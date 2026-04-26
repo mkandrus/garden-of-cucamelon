@@ -1,0 +1,12 @@
+{
+  "pump": {
+    "times": ["00:00", "08:00", "16:00"],
+    "duration_minutes": 5
+  },
+  "lights": [
+    { "time": "06:00", "brightness": 35 },
+    { "time": "07:00", "brightness": 70 },
+    { "time": "21:00", "brightness": 35 },
+    { "time": "22:00", "brightness": 0 }
+  ]
+}
