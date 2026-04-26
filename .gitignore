@@ -10,6 +10,5 @@ venv/
 # Photos (runtime data, not committed)
 /photos/
 
-# Frontend build artifacts
-frontend/node_modules/
-frontend/dist/
+# Frontend directory (React/Vite removed, kept out of git)
+frontend/

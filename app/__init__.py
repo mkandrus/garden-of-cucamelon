@@ -1,5 +1,4 @@
-import os
-from flask import Flask, send_from_directory
+from flask import Flask, render_template
 from .sensors.light.routes import light_blueprint
 from .sensors.pump.routes import pump_blueprint
 from .sensors.distance.routes import distance_blueprint
@@ -25,16 +24,9 @@ def create_app(config_name):
     app.register_blueprint(photos_blueprint, url_prefix='/photos')
     app.register_blueprint(schedule_blueprint, url_prefix='/schedule')
 
-    # Serve React build — catch-all must be registered last
-    dist_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'dist'))
-
-    @app.route('/', defaults={'path': ''})
-    @app.route('/<path:path>')
-    def serve_gui(path):
-        full = os.path.join(dist_dir, path)
-        if path and os.path.exists(full):
-            return send_from_directory(dist_dir, path)
-        return send_from_directory(dist_dir, 'index.html')
+    @app.route('/')
+    def index():
+        return render_template('index.html')
 
     # @app.teardown_appcontext
     # def shutdown_session(exception=None):

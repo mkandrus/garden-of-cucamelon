@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garden Monitor</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <h1>Garden Monitor</h1>
+  <span id="last-updated"></span>
+</header>
+
+<div class="grid">
+
+  <!-- Sensors -->
+  <div class="card">
+    <p class="card-title">Sensors</p>
+    <div class="sensor-row">
+      <span class="sensor-label">Temperature</span>
+      <span><span class="sensor-value" id="val-temp">—</span><span class="sensor-unit"> °C</span></span>
+    </div>
+    <div class="sensor-row">
+      <span class="sensor-label">Humidity</span>
+      <span><span class="sensor-value" id="val-humidity">—</span><span class="sensor-unit"> %</span></span>
+    </div>
+    <div class="sensor-row">
+      <span class="sensor-label">Water level</span>
+      <span><span class="sensor-value" id="val-distance">—</span><span class="sensor-unit"> cm</span></span>
+    </div>
+    <div class="sensor-row">
+      <span class="sensor-label">PCB temp</span>
+      <span><span class="sensor-value" id="val-pcbtemp">—</span><span class="sensor-unit"> °C</span></span>
+    </div>
+  </div>
+
+  <!-- Light -->
+  <div class="card">
+    <p class="card-title">Light <span class="dot dot-off" id="light-dot"></span></p>
+    <div class="btn-row">
+      <button id="btn-light-on">ON</button>
+      <button class="btn-danger" id="btn-light-off">OFF</button>
+    </div>
+    <div class="slider-label">
+      <span>Brightness</span><span id="val-brightness">—</span>%
+    </div>
+    <input type="range" id="slider-brightness" min="0" max="100" value="50">
+    <p class="error-msg" id="light-error"></p>
+  </div>
+
+  <!-- Pump -->
+  <div class="card">
+    <p class="card-title">Pump <span class="dot dot-off" id="pump-dot"></span></p>
+    <div class="btn-row">
+      <button id="btn-pump-on">ON</button>
+      <button class="btn-danger" id="btn-pump-off">OFF</button>
+    </div>
+    <div class="run-row">
+      <label>Run for <input type="number" id="pump-duration" value="5" min="1" max="60"> min</label>
+      <button id="btn-pump-run">Run</button>
+    </div>
+    <p class="countdown" id="pump-countdown"></p>
+    <p class="error-msg" id="pump-error"></p>
+  </div>
+
+  <!-- Camera -->
+  <div class="card card-wide">
+    <p class="card-title">Camera</p>
+    <div class="warning-banner" id="storage-warning" style="display:none">
+      ⚠ Storage above 8 GB — oldest photos are being pruned automatically.
+    </div>
+    <div class="photo-pair">
+      <div class="photo-slot">
+        <p>Upper</p>
+        <img id="img-upper" alt="upper camera" src="" style="display:none" onclick="openLightbox(this.src)">
+        <div class="photo-placeholder" id="ph-upper">No photo yet</div>
+      </div>
+      <div class="photo-slot">
+        <p>Lower</p>
+        <img id="img-lower" alt="lower camera" src="" style="display:none" onclick="openLightbox(this.src)">
+        <div class="photo-placeholder" id="ph-lower">No photo yet</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-refresh-photos">Refresh</button>
+      <button class="btn-secondary" id="btn-take-photo">Take Photo</button>
+      <button class="btn-secondary" id="btn-load-album">Load Album</button>
+    </div>
+    <p class="error-msg" id="camera-error"></p>
+    <div class="album" id="album"></div>
+  </div>
+
+  <!-- Schedule -->
+  <div class="card card-wide">
+    <p class="card-title">Schedule</p>
+    <div class="schedule-cols">
+      <div class="schedule-section">
+        <h3>Pump</h3>
+        <div class="schedule-meta">
+          Duration: <input type="number" id="pump-duration-sched" min="1" max="60" value="5"> min
+          <span class="muted">(fixed at 30% speed)</span>
+        </div>
+        <div id="pump-times"></div>
+        <button class="btn-add" id="btn-add-pump-time">+ Add time</button>
+      </div>
+      <div class="schedule-section">
+        <h3>Lights</h3>
+        <p class="muted small">Set brightness to 0 to turn off</p>
+        <div id="light-entries"></div>
+        <button class="btn-add" id="btn-add-light-entry">+ Add entry</button>
+      </div>
+    </div>
+    <div class="schedule-footer">
+      <button id="btn-save-schedule">Save Schedule</button>
+      <span id="save-status"></span>
+    </div>
+  </div>
+
+</div><!-- .grid -->
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="fullscreen" onclick="event.stopPropagation()">
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
