@@ -7,12 +7,11 @@ from .sensors.humidity.routes import humidity_blueprint
 from .sensors.pcb_temp.routes import pcb_temp_blueprint
 from .photos.routes import photos_blueprint
 from .schedule.routes import schedule_blueprint
+from .history.routes import history_blueprint
+from .db import init_db, start_sampler
 
 def create_app(config_name):
     app = Flask(__name__)
-
-    # from your_flask_app.config import Config
-    # app.config.from_object(Config)
 
     # Register blueprints
     app.register_blueprint(light_blueprint, url_prefix='/light')
@@ -23,6 +22,10 @@ def create_app(config_name):
     app.register_blueprint(pcb_temp_blueprint, url_prefix='/pcb-temp')
     app.register_blueprint(photos_blueprint, url_prefix='/photos')
     app.register_blueprint(schedule_blueprint, url_prefix='/schedule')
+    app.register_blueprint(history_blueprint, url_prefix='/history')
+
+    init_db()
+    start_sampler()
 
     @app.route('/')
     def index():

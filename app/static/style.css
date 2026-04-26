@@ -243,3 +243,77 @@ input[type='number'], input[type='time'] {
 
 .muted { color: var(--muted); }
 .small { font-size: 0.75rem; }
+
+/* Tabs */
+.tab-bar {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 0.5rem 1.1rem 0.6rem;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  opacity: 1;
+}
+.tab-btn:hover { color: var(--text); opacity: 1; }
+.tab-btn.tab-active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Advanced toolbar */
+.advanced-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.range-presets { display: flex; gap: 0.35rem; }
+.range-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  opacity: 1;
+}
+.range-btn:hover { border-color: var(--accent); color: var(--accent); }
+.range-btn.range-active { border-color: var(--accent); color: var(--accent); background: rgba(93,156,89,0.1); }
+.range-custom {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.interval-control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  font-size: 0.875rem;
+}
+
+/* Charts */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 1.25rem;
+}
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+.chart-unit { color: var(--muted); font-size: 0.75rem; text-transform: none; letter-spacing: 0; }

@@ -13,6 +13,13 @@
   <span id="last-updated"></span>
 </header>
 
+<nav class="tab-bar">
+  <button class="tab-btn tab-active" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="advanced">Advanced</button>
+</nav>
+
+<!-- Dashboard Tab -->
+<div id="tab-dashboard" class="tab-panel">
 <div class="grid">
 
   <!-- Sensors -->
@@ -119,12 +126,61 @@
   </div>
 
 </div><!-- .grid -->
+</div><!-- #tab-dashboard -->
+
+<!-- Advanced Tab -->
+<div id="tab-advanced" class="tab-panel" style="display:none">
+  <div class="advanced-toolbar">
+    <div class="range-presets">
+      <button class="range-btn range-active" data-hours="1">1H</button>
+      <button class="range-btn" data-hours="6">6H</button>
+      <button class="range-btn" data-hours="24">24H</button>
+      <button class="range-btn" data-hours="168">7D</button>
+      <button class="range-btn" data-hours="720">30D</button>
+    </div>
+    <div class="range-custom">
+      <input type="datetime-local" id="range-from">
+      <span class="muted">to</span>
+      <input type="datetime-local" id="range-to">
+      <button id="btn-range-apply" class="btn-secondary">Apply</button>
+    </div>
+    <div class="interval-control">
+      <span class="muted">Sample every</span>
+      <input type="number" id="sample-interval" min="1" max="1440" value="10" style="width:60px">
+      <span class="muted">min</span>
+      <button id="btn-interval-save" class="btn-secondary">Set</button>
+      <span id="interval-status" style="font-size:0.8rem"></span>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <p class="card-title">Temperature <span class="chart-unit">°C</span></p>
+      <canvas id="chart-temp"></canvas>
+    </div>
+    <div class="chart-card">
+      <p class="card-title">Humidity <span class="chart-unit">%</span></p>
+      <canvas id="chart-humidity"></canvas>
+    </div>
+    <div class="chart-card">
+      <p class="card-title">Water Level <span class="chart-unit">cm</span></p>
+      <canvas id="chart-distance"></canvas>
+    </div>
+    <div class="chart-card">
+      <p class="card-title">PCB Temp <span class="chart-unit">°C</span></p>
+      <canvas id="chart-pcbtemp"></canvas>
+    </div>
+  </div>
+  <p class="error-msg" id="history-error" style="margin-top:1rem"></p>
+</div><!-- #tab-advanced -->
 
 <!-- Lightbox -->
 <div id="lightbox" onclick="closeLightbox()">
   <img id="lightbox-img" src="" alt="fullscreen" onclick="event.stopPropagation()">
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

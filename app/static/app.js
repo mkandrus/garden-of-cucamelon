@@ -329,13 +329,147 @@
     });
   }
 
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+
+  function initTabs() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+        btn.classList.add('tab-active');
+        document.getElementById('tab-' + btn.dataset.tab).style.display = '';
+        if (btn.dataset.tab === 'advanced') refreshCharts();
+      });
+    });
+  }
+
+  // ── Advanced: Charts ──────────────────────────────────────────────────────
+
+  let charts = {};
+  let activePresetHours = 1;
+
+  const CHART_COLOR = '#5d9c59';
+  const CHART_WARN  = '#e67e22';
+
+  function makeChart(canvasId, unit, color) {
+    return new Chart(document.getElementById(canvasId), {
+      type: 'line',
+      data: {
+        datasets: [{
+          data: [],
+          borderColor: color,
+          backgroundColor: color + '18',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          borderWidth: 1.5,
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: false,
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: {
+            type: 'time',
+            time: { tooltipFormat: 'MMM d, HH:mm' },
+            ticks: { color: '#8a9a8a', maxTicksLimit: 8 },
+            grid: { color: '#3a4a3a' },
+          },
+          y: {
+            ticks: { color: '#8a9a8a', callback: v => v + ' ' + unit },
+            grid: { color: '#3a4a3a' },
+          },
+        },
+        plugins: { legend: { display: false } },
+      },
+    });
+  }
+
+  function initCharts() {
+    charts.temp     = makeChart('chart-temp',     '°C', CHART_COLOR);
+    charts.humidity = makeChart('chart-humidity',  '%',  CHART_COLOR);
+    charts.distance = makeChart('chart-distance', 'cm', CHART_COLOR);
+    charts.pcbtemp  = makeChart('chart-pcbtemp',  '°C', CHART_WARN);
+  }
+
+  async function loadHistory(fromDate, toDate) {
+    try {
+      showError('history-error', '');
+      const from = fromDate.toISOString();
+      const to   = toDate.toISOString();
+      const data = await api('GET', `/history?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+      const readings = data.readings || [];
+      const toPoints = key => readings
+        .filter(r => r[key] !== null)
+        .map(r => ({ x: new Date(r.timestamp), y: r[key] }));
+
+      charts.temp.data.datasets[0].data     = toPoints('temperature');
+      charts.humidity.data.datasets[0].data = toPoints('humidity');
+      charts.distance.data.datasets[0].data = toPoints('distance');
+      charts.pcbtemp.data.datasets[0].data  = toPoints('pcb_temp');
+      Object.values(charts).forEach(c => c.update());
+    } catch (e) { showError('history-error', 'Failed to load history: ' + e.message); }
+  }
+
+  function refreshCharts() {
+    const now  = new Date();
+    const from = new Date(now - activePresetHours * 3600 * 1000);
+    loadHistory(from, now);
+  }
+
+  function initAdvanced() {
+    // Range preset buttons
+    document.querySelectorAll('.range-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('range-active'));
+        btn.classList.add('range-active');
+        activePresetHours = Number(btn.dataset.hours);
+        refreshCharts();
+      });
+    });
+
+    // Custom range apply
+    document.getElementById('btn-range-apply').addEventListener('click', () => {
+      const fromVal = document.getElementById('range-from').value;
+      const toVal   = document.getElementById('range-to').value;
+      if (!fromVal || !toVal) return;
+      document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('range-active'));
+      loadHistory(new Date(fromVal), new Date(toVal));
+    });
+
+    // Sample interval
+    api('GET', '/history/interval').then(data => {
+      document.getElementById('sample-interval').value = Math.round(data.interval_seconds / 60);
+    }).catch(() => {});
+
+    document.getElementById('btn-interval-save').addEventListener('click', async () => {
+      const minutes = Number(document.getElementById('sample-interval').value) || 10;
+      const statusEl = document.getElementById('interval-status');
+      try {
+        await api('POST', '/history/interval', { interval_seconds: minutes * 60 });
+        statusEl.textContent = 'Saved';
+        statusEl.style.color = 'var(--accent)';
+      } catch (e) {
+        statusEl.textContent = 'Error';
+        statusEl.style.color = 'var(--danger)';
+      }
+      setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    });
+
+    initCharts();
+  }
+
   // ── Boot ──────────────────────────────────────────────────────────────────
 
   async function init() {
+    initTabs();
     initLight();
     initPump();
     initCamera();
     initSchedule();
+    initAdvanced();
 
     await Promise.allSettled([
       fetchSensors(),
