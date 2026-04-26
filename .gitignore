@@ -10,5 +10,8 @@ venv/
 # Photos (runtime data, not committed)
 /photos/
 
+# Sensor history database (runtime data)
+/garden.db
+
 # Frontend directory (React/Vite removed, kept out of git)
 frontend/

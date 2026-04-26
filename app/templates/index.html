@@ -13,6 +13,13 @@
   <span id="last-updated"></span>
 </header>
 
+<nav class="tab-bar">
+  <button class="tab-btn tab-active" data-tab="dashboard">Dashboard</button>
+  <button class="tab-btn" data-tab="advanced">Advanced</button>
+</nav>
+
+<!-- Dashboard Tab -->
+<div id="tab-dashboard" class="tab-panel">
 <div class="grid">
 
   <!-- Sensors -->
@@ -112,6 +119,25 @@
         <button class="btn-add" id="btn-add-light-entry">+ Add entry</button>
       </div>
     </div>
+    <div class="schedule-camera">
+      <h3>Camera</h3>
+      <div class="schedule-meta">
+        Take photos every
+        <select id="camera-interval">
+          <option value="0">Off</option>
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="15">15 min</option>
+          <option value="30" selected>30 min</option>
+          <option value="60">1 hour</option>
+          <option value="120">2 hours</option>
+          <option value="240">4 hours</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+          <option value="1440">24 hours</option>
+        </select>
+      </div>
+    </div>
     <div class="schedule-footer">
       <button id="btn-save-schedule">Save Schedule</button>
       <span id="save-status"></span>
@@ -119,12 +145,106 @@
   </div>
 
 </div><!-- .grid -->
+</div><!-- #tab-dashboard -->
+
+<!-- Advanced Tab -->
+<div id="tab-advanced" class="tab-panel" style="display:none">
+  <div class="advanced-toolbar">
+    <div class="range-presets">
+      <button class="range-btn range-active" data-hours="1">1H</button>
+      <button class="range-btn" data-hours="6">6H</button>
+      <button class="range-btn" data-hours="24">24H</button>
+      <button class="range-btn" data-hours="168">7D</button>
+      <button class="range-btn" data-hours="720">30D</button>
+    </div>
+    <div class="range-custom">
+      <input type="datetime-local" id="range-from">
+      <span class="muted">to</span>
+      <input type="datetime-local" id="range-to">
+      <button id="btn-range-apply" class="btn-secondary">Apply</button>
+    </div>
+    <div class="interval-control">
+      <span class="muted">Sample every</span>
+      <input type="number" id="sample-interval" min="1" max="1440" value="10" style="width:60px">
+      <span class="muted">min</span>
+      <button id="btn-interval-save" class="btn-secondary">Set</button>
+      <span id="interval-status" style="font-size:0.8rem"></span>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <p class="card-title">Temperature <span class="chart-unit">°C</span></p>
+      <canvas id="chart-temp"></canvas>
+    </div>
+    <div class="chart-card">
+      <p class="card-title">Humidity <span class="chart-unit">%</span></p>
+      <canvas id="chart-humidity"></canvas>
+    </div>
+    <div class="chart-card">
+      <p class="card-title">Water Level <span class="chart-unit">cm</span></p>
+      <canvas id="chart-distance"></canvas>
+    </div>
+    <div class="chart-card">
+      <p class="card-title">PCB Temp <span class="chart-unit">°C</span></p>
+      <canvas id="chart-pcbtemp"></canvas>
+    </div>
+  </div>
+  <p class="error-msg" id="history-error" style="margin-top:1rem"></p>
+
+  <!-- Timelapse -->
+  <div class="card" style="margin-top:1.25rem">
+    <p class="card-title">Timelapse</p>
+    <div class="timelapse-form">
+      <div class="timelapse-row">
+        <label>Camera
+          <select id="tl-camera">
+            <option value="upper">Upper</option>
+            <option value="lower">Lower</option>
+          </select>
+        </label>
+        <label>FPS
+          <select id="tl-fps">
+            <option value="12">12</option>
+            <option value="24" selected>24</option>
+            <option value="30">30</option>
+          </select>
+        </label>
+        <label>Format
+          <select id="tl-format">
+            <option value="mp4">MP4</option>
+            <option value="gif">GIF</option>
+          </select>
+        </label>
+      </div>
+      <div class="timelapse-row">
+        <label>From <input type="datetime-local" id="tl-from"></label>
+        <label>To <input type="datetime-local" id="tl-to"></label>
+        <button id="btn-tl-create">Create Timelapse</button>
+      </div>
+      <div id="tl-status-row" style="display:none" class="timelapse-status">
+        <span id="tl-status-msg"></span>
+        <a id="tl-download-link" style="display:none" class="tl-download-btn">Download</a>
+      </div>
+      <p class="error-msg" id="tl-error"></p>
+    </div>
+
+    <div style="margin-top:1.25rem">
+      <p class="card-title" style="margin-bottom:0.6rem">Previous Timelapses
+        <button class="btn-secondary" id="btn-tl-refresh" style="font-size:0.75rem;padding:0.2rem 0.5rem;margin-left:0.5rem">Refresh</button>
+      </p>
+      <div id="tl-list"><span class="muted small">No timelapses yet</span></div>
+    </div>
+  </div>
+</div><!-- #tab-advanced -->
 
 <!-- Lightbox -->
 <div id="lightbox" onclick="closeLightbox()">
   <img id="lightbox-img" src="" alt="fullscreen" onclick="event.stopPropagation()">
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>
