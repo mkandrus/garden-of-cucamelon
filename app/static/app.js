@@ -292,7 +292,13 @@
       }))
       .filter(e => e.time);
 
-    return { pump: { times: pumpTimes, duration_minutes: duration }, lights };
+    const cameraInterval = Number(document.getElementById('camera-interval').value) || 0;
+
+    return {
+      pump: { times: pumpTimes, duration_minutes: duration },
+      lights,
+      camera: { interval_minutes: cameraInterval },
+    };
   }
 
   async function loadSchedule() {
@@ -306,6 +312,11 @@
 
       (data.pump?.times || []).forEach(t => addPumpTimeRow(t));
       (data.lights || []).forEach(e => addLightEntryRow(e));
+
+      const camInterval = data.camera?.interval_minutes ?? 30;
+      const sel = document.getElementById('camera-interval');
+      // Select the closest option
+      [...sel.options].forEach(o => { if (Number(o.value) === camInterval) o.selected = true; });
     } catch (e) { showError('save-status', 'Load failed: ' + e.message); }
   }
 
@@ -341,6 +352,112 @@
         if (btn.dataset.tab === 'advanced') refreshCharts();
       });
     });
+  }
+
+  // ── Advanced: Timelapse ───────────────────────────────────────────────────
+
+  let _tlPollTimer = null;
+
+  function _localToISO(localStr) {
+    // datetime-local gives "YYYY-MM-DDTHH:MM", treat as local time
+    return new Date(localStr).toISOString();
+  }
+
+  async function loadTimelapseList() {
+    try {
+      const data = await api('GET', '/timelapse/list');
+      const el = document.getElementById('tl-list');
+      const items = data.timelapses || [];
+      if (items.length === 0) {
+        el.innerHTML = '<span class="muted small">No timelapses yet</span>';
+        return;
+      }
+      el.innerHTML = '';
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'tl-list-entry';
+        div.innerHTML = `
+          <span class="tl-list-meta">${item.created} &mdash; ${item.format.toUpperCase()} &mdash; ${item.size_mb} MB</span>
+          <a href="/timelapse/${item.job_id}/download" class="tl-download-btn" download="${item.filename}">Download</a>
+        `;
+        el.appendChild(div);
+      });
+    } catch (e) { /* silently ignore */ }
+  }
+
+  function _pollTlStatus(jobId) {
+    if (_tlPollTimer) clearInterval(_tlPollTimer);
+    _tlPollTimer = setInterval(async () => {
+      try {
+        const data = await api('GET', `/timelapse/${jobId}/status`);
+        const msgEl = document.getElementById('tl-status-msg');
+        if (data.status === 'rendering') {
+          msgEl.textContent = `Rendering ${data.frame_count} frames…`;
+        } else if (data.status === 'done') {
+          clearInterval(_tlPollTimer);
+          msgEl.textContent = 'Done!';
+          const link = document.getElementById('tl-download-link');
+          link.href = `/timelapse/${jobId}/download`;
+          link.download = data.filename;
+          link.style.display = '';
+          loadTimelapseList();
+        } else if (data.status === 'error') {
+          clearInterval(_tlPollTimer);
+          msgEl.textContent = '';
+          showError('tl-error', 'Render failed: ' + (data.error || 'unknown error'));
+          document.getElementById('tl-status-row').style.display = 'none';
+        }
+      } catch (e) {
+        clearInterval(_tlPollTimer);
+      }
+    }, 3000);
+  }
+
+  function initTimelapse() {
+    // Default from/to to last 24h
+    const now = new Date();
+    const yesterday = new Date(now - 24 * 3600 * 1000);
+    const fmt = d => d.toISOString().slice(0, 16);
+    document.getElementById('tl-from').value = fmt(yesterday);
+    document.getElementById('tl-to').value   = fmt(now);
+
+    document.getElementById('btn-tl-create').addEventListener('click', async () => {
+      const fromVal = document.getElementById('tl-from').value;
+      const toVal   = document.getElementById('tl-to').value;
+      if (!fromVal || !toVal) { showError('tl-error', 'Set a from and to date'); return; }
+
+      showError('tl-error', '');
+      const btn = document.getElementById('btn-tl-create');
+      btn.disabled = true;
+
+      const link = document.getElementById('tl-download-link');
+      link.style.display = 'none';
+
+      const statusRow = document.getElementById('tl-status-row');
+      statusRow.style.display = '';
+      document.getElementById('tl-status-msg').textContent = 'Queuing…';
+
+      try {
+        const data = await api('POST', '/timelapse', {
+          from:   _localToISO(fromVal),
+          to:     _localToISO(toVal),
+          camera: document.getElementById('tl-camera').value,
+          fps:    Number(document.getElementById('tl-fps').value),
+          format: document.getElementById('tl-format').value,
+        });
+        document.getElementById('tl-status-msg').textContent =
+          `Rendering ${data.frame_count} frames…`;
+        _pollTlStatus(data.job_id);
+      } catch (e) {
+        showError('tl-error', e.message);
+        statusRow.style.display = 'none';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('btn-tl-refresh').addEventListener('click', loadTimelapseList);
+    loadTimelapseList();
   }
 
   // ── Advanced: Charts ──────────────────────────────────────────────────────
@@ -459,6 +576,7 @@
     });
 
     initCharts();
+    initTimelapse();
   }
 
   // ── Boot ──────────────────────────────────────────────────────────────────

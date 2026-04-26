@@ -8,6 +8,7 @@ from .sensors.pcb_temp.routes import pcb_temp_blueprint
 from .photos.routes import photos_blueprint
 from .schedule.routes import schedule_blueprint
 from .history.routes import history_blueprint
+from .timelapse.routes import timelapse_blueprint
 from .db import init_db, start_sampler
 
 def create_app(config_name):
@@ -23,6 +24,7 @@ def create_app(config_name):
     app.register_blueprint(photos_blueprint, url_prefix='/photos')
     app.register_blueprint(schedule_blueprint, url_prefix='/schedule')
     app.register_blueprint(history_blueprint, url_prefix='/history')
+    app.register_blueprint(timelapse_blueprint, url_prefix='/timelapse')
 
     init_db()
     start_sampler()

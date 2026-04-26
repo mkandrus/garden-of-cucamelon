@@ -19,17 +19,16 @@ def _project_root():
 def _apply_crontab(schedule):
     root = _project_root()
     python = os.path.join(root, 'venv', 'bin', 'python')
-    pump_script = os.path.join(root, 'app', 'sensors', 'pump', 'pump.py')
+    pump_script  = os.path.join(root, 'app', 'sensors', 'pump', 'pump.py')
     light_script = os.path.join(root, 'app', 'sensors', 'light', 'light.py')
+    photo_script = os.path.join(root, 'bin', 'take-pictures.sh')
 
     cron = CronTab(user=True)
-
-    # Remove all previously managed entries
     cron.remove_all(comment=CRON_TAG)
 
+    # Pump
     pump = schedule.get('pump', {})
     duration_secs = int(pump.get('duration_minutes', 5)) * 60
-
     for t in pump.get('times', []):
         hour, minute = _parse_time(t)
         cmd = (
@@ -41,6 +40,7 @@ def _apply_crontab(schedule):
         job.hour.on(hour)
         job.minute.on(minute)
 
+    # Lights
     for entry in schedule.get('lights', []):
         hour, minute = _parse_time(entry['time'])
         brightness = int(entry.get('brightness', 0))
@@ -51,6 +51,21 @@ def _apply_crontab(schedule):
         job = cron.new(command=cmd, comment=CRON_TAG)
         job.hour.on(hour)
         job.minute.on(minute)
+
+    # Camera
+    camera = schedule.get('camera', {})
+    interval_min = int(camera.get('interval_minutes', 0))
+    if interval_min > 0:
+        cmd = f'bash "{photo_script}"'
+        job = cron.new(command=cmd, comment=CRON_TAG)
+        if interval_min < 60:
+            job.minute.every(interval_min)
+        elif interval_min == 60:
+            job.minute.on(0)
+        else:
+            hours = interval_min // 60
+            job.minute.on(0)
+            job.hour.every(hours)
 
     cron.write()
 
@@ -67,7 +82,7 @@ def get_schedule():
         with open(path) as f:
             data = json.load(f)
     except FileNotFoundError:
-        data = {'pump': {'times': [], 'duration_minutes': 5}, 'lights': []}
+        data = {'pump': {'times': [], 'duration_minutes': 5}, 'lights': [], 'camera': {'interval_minutes': 30}}
     return jsonify(data), 200
 
 

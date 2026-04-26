@@ -119,6 +119,25 @@
         <button class="btn-add" id="btn-add-light-entry">+ Add entry</button>
       </div>
     </div>
+    <div class="schedule-camera">
+      <h3>Camera</h3>
+      <div class="schedule-meta">
+        Take photos every
+        <select id="camera-interval">
+          <option value="0">Off</option>
+          <option value="5">5 min</option>
+          <option value="10">10 min</option>
+          <option value="15">15 min</option>
+          <option value="30" selected>30 min</option>
+          <option value="60">1 hour</option>
+          <option value="120">2 hours</option>
+          <option value="240">4 hours</option>
+          <option value="360">6 hours</option>
+          <option value="720">12 hours</option>
+          <option value="1440">24 hours</option>
+        </select>
+      </div>
+    </div>
     <div class="schedule-footer">
       <button id="btn-save-schedule">Save Schedule</button>
       <span id="save-status"></span>
@@ -172,6 +191,51 @@
     </div>
   </div>
   <p class="error-msg" id="history-error" style="margin-top:1rem"></p>
+
+  <!-- Timelapse -->
+  <div class="card" style="margin-top:1.25rem">
+    <p class="card-title">Timelapse</p>
+    <div class="timelapse-form">
+      <div class="timelapse-row">
+        <label>Camera
+          <select id="tl-camera">
+            <option value="upper">Upper</option>
+            <option value="lower">Lower</option>
+          </select>
+        </label>
+        <label>FPS
+          <select id="tl-fps">
+            <option value="12">12</option>
+            <option value="24" selected>24</option>
+            <option value="30">30</option>
+          </select>
+        </label>
+        <label>Format
+          <select id="tl-format">
+            <option value="mp4">MP4</option>
+            <option value="gif">GIF</option>
+          </select>
+        </label>
+      </div>
+      <div class="timelapse-row">
+        <label>From <input type="datetime-local" id="tl-from"></label>
+        <label>To <input type="datetime-local" id="tl-to"></label>
+        <button id="btn-tl-create">Create Timelapse</button>
+      </div>
+      <div id="tl-status-row" style="display:none" class="timelapse-status">
+        <span id="tl-status-msg"></span>
+        <a id="tl-download-link" style="display:none" class="tl-download-btn">Download</a>
+      </div>
+      <p class="error-msg" id="tl-error"></p>
+    </div>
+
+    <div style="margin-top:1.25rem">
+      <p class="card-title" style="margin-bottom:0.6rem">Previous Timelapses
+        <button class="btn-secondary" id="btn-tl-refresh" style="font-size:0.75rem;padding:0.2rem 0.5rem;margin-left:0.5rem">Refresh</button>
+      </p>
+      <div id="tl-list"><span class="muted small">No timelapses yet</span></div>
+    </div>
+  </div>
 </div><!-- #tab-advanced -->
 
 <!-- Lightbox -->
