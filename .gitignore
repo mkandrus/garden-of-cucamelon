@@ -6,3 +6,9 @@ venv/
 # If using Jython
 *.class
 .env
+
+# Photos (runtime data, not committed)
+/photos/
+
+# Frontend directory (React/Vite removed, kept out of git)
+frontend/
